@@ -28,6 +28,9 @@ struct FGeometryData
 	UPROPERTY(EditAnywhere, Category = "Movement")
 	EMovementType MoveType = EMovementType::Static;
 
+	UPROPERTY(EditAnywhere, Category = "Design")
+	FLinearColor Color = FLinearColor::Black;
+
 };
 
 UCLASS()
@@ -38,10 +41,7 @@ class UESANDBOX_API ABaseGeometryActor : public AActor
 public:	
 	// Sets default values for this actor's properties
 	ABaseGeometryActor();
-
-	UPROPERTY(VisibleAnywhere)
-	UStaticMeshComponent* BaseMesh;
-
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -69,6 +69,10 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 private:
+
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* BaseMesh;
+
 	FVector InitialLocation;
 
 	void PrintTypes();
@@ -76,4 +80,6 @@ private:
 	void PrintTransform();
 
 	void HandleMovement();
+
+	void SetColor(const FLinearColor& Color);
 };
