@@ -31,6 +31,9 @@ struct FGeometryData
 	UPROPERTY(EditAnywhere, Category = "Design")
 	FLinearColor Color = FLinearColor::Black;
 
+	UPROPERTY(EditAnywhere, Category = "Design")
+	float TimerRate = 3.0f;
+
 };
 
 UCLASS()
@@ -74,6 +77,10 @@ private:
 	UStaticMeshComponent* BaseMesh;
 
 	FVector InitialLocation;
+	FTimerHandle TimerHandle;
+
+	const int32 MaxTimerCount = 5;
+	int32 TimerCount = 0;
 
 	void PrintTypes();
 	void PrintStringtypes();
@@ -82,4 +89,6 @@ private:
 	void HandleMovement();
 
 	void SetColor(const FLinearColor& Color);
+
+	void OnTimerFired();
 };
