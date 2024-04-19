@@ -44,6 +44,8 @@ class UESANDBOX_API ABaseGeometryActor : public AActor
 public:	
 	// Sets default values for this actor's properties
 	ABaseGeometryActor();
+
+	void SetGeometryData(const FGeometryData& Data) { GeometryData = Data; }
 	
 protected:
 	// Called when the game starts or when spawned
