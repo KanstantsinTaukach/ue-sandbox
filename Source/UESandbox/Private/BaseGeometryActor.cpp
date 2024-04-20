@@ -34,6 +34,14 @@ void ABaseGeometryActor::BeginPlay()
 	SetColor(GeometryData.Color);
 	
 	GetWorldTimerManager().SetTimer(TimerHandle, this, &ABaseGeometryActor::OnTimerFired, GeometryData.TimerRate, true);
+
+	PrintGeometryData();
+}
+
+void ABaseGeometryActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	UE_LOG(LogBaseGeometry, Error, TEXT("%s actor is dead."), *GetName());
+	Super::EndPlay(EndPlayReason);
 }
 
 // Called every frame
@@ -91,6 +99,38 @@ void ABaseGeometryActor::PrintTransform()
 	UE_LOG(LogBaseGeometry, Error, TEXT("Human transform: %s"), *Transform.ToHumanReadableString());
 }
 
+void ABaseGeometryActor::PrintGeometryData()
+{
+
+	FString AmplitudeStr = "Amplitude = " + FString::SanitizeFloat(GeometryData.Amplitude);
+	FString FrequencyStr = "Frequency = " + FString::SanitizeFloat(GeometryData.Frequency);
+
+	FString MoveTypeStr = "";
+	if (GeometryData.MoveType == EMovementType::Static)
+	{
+		MoveTypeStr = "EMovementType - Static";
+	}
+	else if (GeometryData.MoveType == EMovementType::Sin)
+	{
+		MoveTypeStr = "EMovementType - Sin";
+	}
+
+	FString ColorStr = "Color " + GeometryData.Color.ToString();
+	FString TimerRateStr = "TimerRate is: " + FString::SanitizeFloat(GeometryData.TimerRate);
+
+	FString GeometryDataStr = 
+		FString::Printf(TEXT("\n ===== GeometryData ===== \n %s \n %s \n %s \n %s \n %s"), 
+		*AmplitudeStr, 
+		*FrequencyStr, 
+		*MoveTypeStr, 
+		*ColorStr, 
+		*TimerRateStr);
+
+	UE_LOG(LogBaseGeometry, Error, TEXT("Actor name: %s"), *GetName());
+	UE_LOG(LogBaseGeometry, Error, TEXT("%s"), *GeometryDataStr);
+
+}
+
 void ABaseGeometryActor::HandleMovement()
 {
 	switch (GeometryData.MoveType)
@@ -135,11 +175,13 @@ void ABaseGeometryActor::OnTimerFired()
 		const FLinearColor NewColor = FLinearColor::MakeRandomColor();
 		UE_LOG(LogBaseGeometry, Warning, TEXT("Timer count: %i, Color to set up: %s"), TimerCount, *NewColor.ToString());
 		SetColor(NewColor);
+		OnColorChanged.Broadcast(NewColor, GetName());
 	}
 	else
 	{
 		UE_LOG(LogBaseGeometry, Error, TEXT("Timer has been stopped!"));
 		GetWorldTimerManager().ClearTimer(TimerHandle);
+		OnTimerFinished.Broadcast(this);
 	}
 }
 

@@ -4,6 +4,8 @@
 #include "GeometryHubActor.h"
 #include "Engine/World.h"
 
+DEFINE_LOG_CATEGORY_STATIC(LogGeometreHub, All, All)
+
 // Sets default values
 AGeometryHubActor::AGeometryHubActor()
 {
@@ -17,8 +19,8 @@ void AGeometryHubActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	DoActorSpawn1();
-	DoActorSpawn2();
+	//DoActorSpawn1();
+	//DoActorSpawn2();
 	DoActorSpawn3();
 			
 }
@@ -30,12 +32,36 @@ void AGeometryHubActor::Tick(float DeltaTime)
 
 }
 
+void AGeometryHubActor::OnColorChanged(const FLinearColor& Color, const FString& Name)
+{
+	UE_LOG(LogGeometreHub, Warning, TEXT("Actor name: %s Color %s"), *Name, *Color.ToString());
+}
+
+void AGeometryHubActor::OnTimerFinished(AActor* Actor)
+{
+	if (!Actor)
+	{
+		return;
+	}
+	UE_LOG(LogGeometreHub, Error, TEXT("Timer finished: %s"), *Actor->GetName());
+
+	ABaseGeometryActor* Geometry = Cast<ABaseGeometryActor>(Actor);
+	if (!Geometry)
+	{
+		return;
+	}
+
+	UE_LOG(LogGeometreHub, Display, TEXT("Cast is success, amplitude %f"), Geometry->GetGeometryData().Amplitude);
+	Geometry->Destroy();
+	//Geometry->SetLifeSpan(2.0f);
+}
+
 void AGeometryHubActor::DoActorSpawn1()
 {
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		for (size_t i = 0; i < 10; i++)
+		for (int32 i = 0; i < 10; i++)
 		{
 			const FTransform GeometryTransform = FTransform(FRotator::ZeroRotator, FVector(0.0f, 300.f * i, 300.0f));
 			ABaseGeometryActor* Geometry = World->SpawnActor<ABaseGeometryActor>(GeometryClass, GeometryTransform);
@@ -55,7 +81,7 @@ void AGeometryHubActor::DoActorSpawn2()
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		for (size_t i = 0; i < 10; i++)
+		for (int32 i = 0; i < 10; i++)
 		{
 			const FTransform GeometryTransform = FTransform(FRotator::ZeroRotator, FVector(0.0f, 300.f * i, 700.0f));
 			ABaseGeometryActor* Geometry = World->SpawnActorDeferred<ABaseGeometryActor>(GeometryClass, GeometryTransform);
@@ -83,6 +109,8 @@ void AGeometryHubActor::DoActorSpawn3()
 			if (Geometry)
 			{
 				Geometry->SetGeometryData(Payload.Data);
+				Geometry->OnColorChanged.AddDynamic(this, &AGeometryHubActor::OnColorChanged);
+				Geometry->OnTimerFinished.AddUObject(this, &AGeometryHubActor::OnTimerFinished);
 				Geometry->FinishSpawning(Payload.InitialTransform);
 			}
 		}
