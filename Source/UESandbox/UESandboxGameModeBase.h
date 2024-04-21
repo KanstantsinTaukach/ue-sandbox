@@ -14,4 +14,6 @@ class UESANDBOX_API AUESandboxGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 	
+public:
+	AUESandboxGameModeBase();
 };
