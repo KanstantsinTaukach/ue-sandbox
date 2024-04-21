@@ -3,6 +3,8 @@
 
 #include "SandboxPawn.h"
 #include "Components/InputComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "Camera/CameraComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogSandboxPawn, All, All)
 
@@ -15,6 +17,32 @@ ASandboxPawn::ASandboxPawn()
 	SceneComponent = CreateDefaultSubobject<USceneComponent>("SceneComponent");
 	SetRootComponent(SceneComponent);
 
+	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>("StaticMeshComponent");
+	StaticMeshComponent->SetupAttachment(GetRootComponent());
+//	StaticMeshComponent->SetupAttachment(SceneComponent);
+
+	CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
+	CameraComponent->SetupAttachment(GetRootComponent());
+
+}
+
+void ASandboxPawn::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	if (!NewController)
+	{
+		return;
+	}
+
+	UE_LOG(LogSandboxPawn, Error, TEXT("%s possessed %s"), *GetName(), *NewController->GetName());
+}
+
+void ASandboxPawn::UnPossessed()
+{
+	Super::UnPossessed();
+
+	UE_LOG(LogSandboxPawn, Warning, TEXT("%s unpossessed"), *GetName());
 }
 
 // Called when the game starts or when spawned
@@ -33,6 +61,7 @@ void ASandboxPawn::Tick(float DeltaTime)
 	{
 		const FVector NewLocation = GetActorLocation() + Velocity * DeltaTime * VelocityVector;
 		SetActorLocation(NewLocation);
+		VelocityVector = FVector::ZeroVector;
 	}
 
 }
@@ -42,19 +71,22 @@ void ASandboxPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAxis("MoveForward", this, &ASandboxPawn::MoveForward);
-	PlayerInputComponent->BindAxis("MoveRight", this, &ASandboxPawn::MoveRight);
+	if (PlayerInputComponent)
+	{
+		PlayerInputComponent->BindAxis("MoveForward", this, &ASandboxPawn::MoveForward);
+		PlayerInputComponent->BindAxis("MoveRight", this, &ASandboxPawn::MoveRight);
+	}
 }
 
 void ASandboxPawn::MoveForward(float Amount)
 {
-	UE_LOG(LogSandboxPawn, Display, TEXT("Move forward: %f"), Amount);
+//	UE_LOG(LogSandboxPawn, Display, TEXT("Move forward: %f"), Amount);
 	VelocityVector.X = Amount;
 }
 
 void ASandboxPawn::MoveRight(float Amount)
 {
-	UE_LOG(LogSandboxPawn, Display, TEXT("Move right: %f"), Amount);
+//	UE_LOG(LogSandboxPawn, Display, TEXT("Move right: %f"), Amount);
 	VelocityVector.Y = Amount;
 }
 
